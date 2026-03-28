@@ -28,7 +28,7 @@ user_dependency = Annotated[User, Depends(get_current_user)]
 
 class PostRequest(BaseModel):
     title : str = Field(min_length=3)
-    content : str = Field(min_length=3, max_length=500)
+    content : str = Field(min_length=3, max_length=1000)
     image_url: Optional[HttpUrl] = None
     
 class PostFeedResponse(BaseModel):
