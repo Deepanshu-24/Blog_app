@@ -61,3 +61,14 @@ async def delete_comment(
     db.commit()
     return {"message": "comment deleted by admin"}
 
+@router.delete("/user/{user_id}", status_code=204)
+async def delete_user(admin:admin_dependency, db: db_dependency, user_id: UUID ):
+
+    user_model = db.query(User).filter(User.id == user_id).first()
+
+    if user_model is None:
+        raise HTTPException(status_code=404, detail='User not found.')
+    
+    db.delete(user_model)
+    db.commit()
+    return {"message": "User deleted by admin"}

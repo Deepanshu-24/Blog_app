@@ -53,3 +53,19 @@ async def count_likes(post_id: UUID, db:db_dependency, user: user_dependency):
     count = db.query(Like).filter(Like.post_id == post_id).count()
     
     return{"likes": count}
+
+
+
+@router.get("/post/{post_id}/user_like_status")
+async def user_like_status(
+    post_id: UUID,
+    user: user_dependency,
+    db: db_dependency
+):
+    post = db.query(Post).filter(Post.id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    
+    existing_like = db.query(Like).filter(Like.user_id == user.id, Like.post_id == post_id).first()
+    
+    return {"has_liked": existing_like is not None}
