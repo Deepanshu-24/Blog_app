@@ -126,18 +126,34 @@ async def create_post(
 
 
 @router.put("/{post_id}", response_model= PostResponse)
-async def update_post(user: user_dependency, db: db_dependency,
-                      post_request : PostRequest ,
-                      post_id:UUID):
+async def update_post(
+    user: user_dependency, 
+    db: db_dependency,
+    post_id: UUID,
+    title: str = Form(...),
+    content: str = Form(...),
+    image_url: Optional[str] = Form(None),
+    file: Optional[UploadFile] = File(None)
+):
 
     post_model = db.query(Post).filter(Post.id == post_id).filter(Post.author_id == user.id).first()
 
     if post_model is None:
         raise HTTPException(status_code=404, detail="Post not found")
 
-    post_model.title = post_request.title
-    post_model.content = post_request.content
-    post_model.image_url = post_request.image_url
+    if file:
+        if file.content_type not in ["image/jpeg", "image/png", "image/jpg"]:
+            raise HTTPException(status_code=400, detail="Invalid image type")
+        try:
+            result = cloudinary.uploader.upload(file.file)
+            post_model.image_url = result["secure_url"]
+        except Exception:
+            raise HTTPException(status_code=500, detail="Image upload failed")
+    elif image_url is not None:
+        post_model.image_url = image_url
+
+    post_model.title = title
+    post_model.content = content
 
     db.commit()
     db.refresh(post_model)
