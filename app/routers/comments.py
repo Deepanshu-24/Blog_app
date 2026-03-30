@@ -33,7 +33,7 @@ class CommentResponse(BaseModel):
 
 
 
-@router.post("/post/{post_id}/comment")
+@router.post("/post/{post_id}/comment", response_model=CommentResponse)
 async def comment(
     post_id: UUID,
     user: user_dependency,
